@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
@@ -61,17 +61,17 @@ pub fn build(b: *std.Build) void {
 
             check_step.dependOn(&exe.step);
 
-            const run_cmd = b.addRunArtifact(exe);
-            run_cmd.step.dependOn(b.getInstallStep());
+            const run_exe = b.addRunArtifact(exe);
+            run_exe.step.dependOn(b.getInstallStep());
 
             if (b.args) |args| {
-                run_cmd.addArgs(args);
+                run_exe.addArgs(args);
             }
 
-            const run_step_name = std.fmt.allocPrint(b.allocator, "run-{s}", .{name}) catch continue;
-            const run_step_desc = std.fmt.allocPrint(b.allocator, "Run example '{s}'", .{name}) catch continue;
+            const run_step_name = try std.fmt.allocPrint(b.allocator, "run-{s}", .{name});
+            const run_step_desc = try std.fmt.allocPrint(b.allocator, "Run example '{s}'", .{name});
             const run_step = b.step(run_step_name, run_step_desc);
-            run_step.dependOn(&run_cmd.step);
+            run_step.dependOn(&run_exe.step);
         }
     }
 }
