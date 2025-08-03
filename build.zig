@@ -23,6 +23,49 @@ pub fn build(b: *std.Build) !void {
     const check_step = b.step("check", "Type-check everything without emitting binaries");
     check_step.dependOn(&lib.step);
 
+    // Add TranslateC of Win32API
+    if (target.result.os.tag == .windows) {
+        const win32_source =
+            \\#define WIN32_LEAN_AND_MEAN
+            \\#include <Windows.h>
+            \\#include <dwmapi.h>
+        ;
+
+        const tc = b.addTranslateC(.{
+            .root_source_file = b.addWriteFiles().add("win32.h", win32_source),
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        });
+        const win32_mod = tc.addModule("win32");
+        win32_mod.linkSystemLibrary("dwmapi", .{});
+        lib.root_module.addImport("win32", win32_mod);
+    }
+
+    // Add TranslateC for Wayland
+    if (target.result.os.tag == .linux) {
+        const Scanner = @import("wayland").Scanner;
+        const scanner = Scanner.create(b, .{});
+        const wayland = b.createModule(.{ .root_source_file = scanner.result });
+
+        // scanner.addSystemProtocol("stable/xdg-shell/xdg-shell.xml");
+        // scanner.addSystemProtocol("staging/ext-session-lock/ext-session-lock-v1.xml");
+
+        // Pass the maximum version implemented by your wayland server or client.
+        // Requests, events, enums, etc. from newer versions will not be generated,
+        // ensuring forwards compatibility with newer protocol xml.
+        // This will also generate code for interfaces created using the provided
+        // global interface, in this example wl_keyboard, wl_pointer, xdg_surface,
+        // xdg_toplevel, etc. would be generated as well.
+        // scanner.generate("wl_seat", 4);
+        // scanner.generate("xdg_wm_base", 3);
+        // scanner.generate("ext_session_lock_manager_v1", 1);
+        // scanner.generate("private_foobar_manager", 1);
+
+        lib.root_module.addImport("wayland", wayland);
+        lib.linkSystemLibrary("wayland-client");
+    }
+
     b.installArtifact(lib);
 
     if (build_examples) {
