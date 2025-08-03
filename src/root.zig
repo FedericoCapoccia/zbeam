@@ -10,3 +10,7 @@ const platform = switch (builtin.os.tag) {
 pub fn initialize() bool {
     return platform.initialize();
 }
+
+pub fn shutdown() void {
+    return platform.shutdown();
+}

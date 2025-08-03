@@ -20,8 +20,14 @@ pub fn build(b: *std.Build) !void {
         .root_module = zbeam_module,
     });
 
-    const check_step = b.step("check", "Type-check everything without emitting binaries");
-    check_step.dependOn(&lib.step);
+    const lib_check = b.addLibrary(.{
+        .name = "zBeam",
+        .linkage = linkage,
+        .root_module = zbeam_module,
+    });
+
+    const check = b.step("check", "Check if it compiles");
+    check.dependOn(&lib_check.step);
 
     // Add TranslateC of Win32API
     if (target.result.os.tag == .windows) {
@@ -99,6 +105,16 @@ pub fn build(b: *std.Build) !void {
                 .link_libc = zbeam_module.link_libc,
             });
 
+            const exe_check = b.addExecutable(.{
+                .name = name,
+                .root_source_file = b.path(path),
+                .target = target,
+                .optimize = optimize,
+                .link_libc = zbeam_module.link_libc,
+            });
+
+            check.dependOn(&exe_check.step);
+
             exe.root_module.addImport("zbeam", lib.root_module);
             exe.linkLibrary(lib);
 
@@ -108,7 +124,7 @@ pub fn build(b: *std.Build) !void {
 
             b.installArtifact(exe);
 
-            check_step.dependOn(&exe.step);
+            // check_step.dependOn(&exe.step);
 
             const run_exe = b.addRunArtifact(exe);
             run_exe.step.dependOn(b.getInstallStep());
