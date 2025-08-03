@@ -63,7 +63,9 @@ pub fn build(b: *std.Build) !void {
         // scanner.generate("private_foobar_manager", 1);
 
         lib.root_module.addImport("wayland", wayland);
-        lib.linkSystemLibrary("wayland-client");
+        if (lib.linkage.? == .dynamic) {
+            lib.linkSystemLibrary("wayland-client");
+        }
     }
 
     b.installArtifact(lib);
@@ -99,6 +101,10 @@ pub fn build(b: *std.Build) !void {
 
             exe.root_module.addImport("zbeam", lib.root_module);
             exe.linkLibrary(lib);
+
+            if (lib.linkage.? == .static) {
+                exe.linkSystemLibrary("wayland-client");
+            }
 
             b.installArtifact(exe);
 
