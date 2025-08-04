@@ -31,21 +31,27 @@ pub fn build(b: *std.Build) !void {
 
     // Add TranslateC of Win32API
     if (target.result.os.tag == .windows) {
-        const win32_source =
-            \\#define WIN32_LEAN_AND_MEAN
-            \\#include <Windows.h>
-            \\#include <dwmapi.h>
-        ;
+        const zigwin32 = b.dependency("zigwin32", .{});
+        lib.root_module.addImport("win32", zigwin32.module("win32"));
 
-        const tc = b.addTranslateC(.{
-            .root_source_file = b.addWriteFiles().add("win32.h", win32_source),
-            .target = target,
-            .optimize = optimize,
-            .link_libc = true,
-        });
-        const win32_mod = tc.addModule("win32");
-        win32_mod.linkSystemLibrary("dwmapi", .{});
-        lib.root_module.addImport("win32", win32_mod);
+        if (lib.linkage.? == .dynamic) {
+            // lib.linkSystemLibrary("dwmapi");
+        }
+        // const win32_source =
+        //     \\#define WIN32_LEAN_AND_MEAN
+        //     \\#include <Windows.h>
+        //     \\#include <dwmapi.h>
+        // ;
+        //
+        // const tc = b.addTranslateC(.{
+        //     .root_source_file = b.addWriteFiles().add("win32.h", win32_source),
+        //     .target = target,
+        //     .optimize = optimize,
+        //     .link_libc = true,
+        // });
+        // const win32_mod = tc.addModule("win32");
+        // win32_mod.linkSystemLibrary("dwmapi", .{});
+        // lib.root_module.addImport("win32", win32_mod);
     }
 
     // Add TranslateC for Wayland
@@ -119,7 +125,11 @@ pub fn build(b: *std.Build) !void {
             exe.linkLibrary(lib);
 
             if (lib.linkage.? == .static) {
-                exe.linkSystemLibrary("wayland-client");
+                if (target.result.os.tag == .linux) {
+                    exe.linkSystemLibrary("wayland-client");
+                } else if (target.result.os.tag == .windows) {
+                    // lib.linkSystemLibrary("dwmapi");
+                }
             }
 
             b.installArtifact(exe);

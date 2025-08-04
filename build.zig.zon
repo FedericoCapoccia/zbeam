@@ -8,6 +8,10 @@
             .url = "git+https://github.com/ifreund/zig-wayland.git#65b01fb69148013eea882c8222a82a1d96a6241b",
             .hash = "wayland-0.4.0-dev-lQa1krLJAQBGO2aKqDcfxUOsW_e4PJZO_K_rxA20RztB",
         },
+        .zigwin32 = .{
+            .url = "git+https://github.com/marlersoft/zigwin32#d21b419d808215e1f82605fdaddc49750bfa3bca",
+            .hash = "zigwin32-25.0.28-preview-AAAAAI0J-wP-8_KKo4Yjr33XLhVhlJmeagGUedByaOnX",
+        },
     },
     .paths = .{
         "build.zig",
