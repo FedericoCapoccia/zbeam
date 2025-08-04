@@ -21,7 +21,6 @@ var g_state: ?Win32PlatformState = null;
 
 pub fn initialize() bool {
     const hinstance: win32.HINSTANCE = @ptrCast(@constCast(&__ImageBase));
-    std.log.info("Current HINSTANCE: {x}", .{@intFromPtr(hinstance)});
 
     const wc = win32.WNDCLASSEXW{
         .cbSize = @sizeOf(win32.WNDCLASSEXW),
@@ -47,12 +46,7 @@ pub fn initialize() bool {
         win32.WINDOW_EX_STYLE{},
         win32.L("zbeam_window_class"),
         win32.L("zBeam window"),
-        win32.WINDOW_STYLE{
-            .SYSMENU = 1,
-            .THICKFRAME = 1,
-            .ACTIVECAPTION = 1,
-            .BORDER = 1,
-        },
+        win32.WS_OVERLAPPEDWINDOW,
         win32.CW_USEDEFAULT,
         win32.CW_USEDEFAULT,
         1280,
@@ -65,7 +59,11 @@ pub fn initialize() bool {
 
     _ = win32.ShowWindow(hwnd, win32.SHOW_WINDOW_CMD{ .SHOWNORMAL = 1 });
 
-    while (true) {}
+    var msg: win32.MSG = undefined;
+    while (win32.GetMessage(&msg, null, 0, 0) != 0) {
+        _ = win32.TranslateMessage(&msg);
+        _ = win32.DispatchMessage(&msg);
+    }
 
     g_state = Win32PlatformState{
         .hinstance = hinstance,

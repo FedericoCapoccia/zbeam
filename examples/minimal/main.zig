@@ -1,5 +1,8 @@
 const std = @import("std");
+
 const zbm = @import("zbeam");
+
+pub const UNICODE = true;
 
 pub fn main() !void {
     if (!zbm.initialize()) {

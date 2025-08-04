@@ -119,10 +119,11 @@ pub fn build(b: *std.Build) !void {
                 .link_libc = zbeam_module.link_libc,
             });
 
-            check.dependOn(&exe_check.step);
-
             exe.root_module.addImport("zbeam", lib.root_module);
+            exe_check.root_module.addImport("zbeam", lib.root_module);
             exe.linkLibrary(lib);
+
+            check.dependOn(&exe_check.step);
 
             if (lib.linkage.? == .static) {
                 if (target.result.os.tag == .linux) {
