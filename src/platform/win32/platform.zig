@@ -60,7 +60,7 @@ pub fn initialize() bool {
     _ = win32.ShowWindow(hwnd, win32.SHOW_WINDOW_CMD{ .SHOWNORMAL = 1 });
 
     var msg: win32.MSG = undefined;
-    while (win32.GetMessage(&msg, null, 0, 0) != 0) {
+    while (win32.GetMessage(&msg, null, 0, 0) > 0) {
         _ = win32.TranslateMessage(&msg);
         _ = win32.DispatchMessage(&msg);
     }
