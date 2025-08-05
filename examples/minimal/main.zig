@@ -13,8 +13,8 @@ pub fn main() !void {
         }
     }
 
-    const zbm_context = try zbm.createContext(allocator);
-    defer zbm.destroyContext(zbm_context);
+    try zbm.initialize(allocator);
+    defer zbm.deinit();
 
     // var window_config = zbm.WindowConfig{
     //     .title = "Minimal example",

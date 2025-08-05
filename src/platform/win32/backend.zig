@@ -1,10 +1,9 @@
 const std = @import("std");
 
-const win32_bindings = @import("win32");
-
 const Error = @import("../../root.zig").Error;
 
 const win32 = struct {
+    const bindings = @import("win32");
     const wm = @import("win32").ui.windows_and_messaging;
     const dwm = @import("win32").graphics.dwm;
     const gdi = @import("win32").graphics.gdi;
@@ -22,12 +21,15 @@ const win32 = struct {
 
 extern const __ImageBase: win32.IMAGE_DOS_HEADER; // https://devblogs.microsoft.com/oldnewthing/20041025-00/?p=37483
 
-pub const Win32State = struct {
+const InternalState = struct {
     hinstance: win32.HINSTANCE,
 };
 
+var initialized: bool = false;
+var internal_state: InternalState = undefined;
+
 /// Initializes Win32 backend state
-pub fn initialize(allocator: std.mem.Allocator) Error!*Win32State {
+pub fn initialize() Error!void {
     std.log.info("Initializing Win32 backend", .{});
     const hinstance: win32.HINSTANCE = @ptrCast(@constCast(&__ImageBase));
 
@@ -56,17 +58,17 @@ pub fn initialize(allocator: std.mem.Allocator) Error!*Win32State {
         return Error.PlatformError;
     }
 
-    const state = try allocator.create(Win32State);
-    state.* = Win32State{
+    internal_state = InternalState{
         .hinstance = hinstance,
     };
-
-    return state;
+    initialized = true;
 }
 
-pub fn shutdown(state: *Win32State, allocator: std.mem.Allocator) void {
-    _ = win32.wm.UnregisterClassW(win32.L("zbeam_window_class"), state.hinstance); // TODO: check if registered first
-    allocator.destroy(state);
+pub fn shutdown() void {
+    if (!initialized) return;
+    _ = win32.wm.UnregisterClassW(win32.L("zbeam_window_class"), internal_state.hinstance); // TODO: check if registered first
+    initialized = false;
+    internal_state = undefined;
 }
 
 // =======================

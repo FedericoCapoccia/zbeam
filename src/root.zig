@@ -1,7 +1,11 @@
 const std = @import("std");
 const builtin = @import("builtin");
 
-const Backend = @import("backend.zig").Backend;
+const backend = switch (builtin.os.tag) {
+    .windows => @import("platform/win32/backend.zig"),
+    .linux => @import("platform/wayland/backend.zig"),
+    else => @compileError("Unsupported OS"),
+};
 
 pub const Error = error{
     NotInitialized,
@@ -9,24 +13,29 @@ pub const Error = error{
     OutOfMemory,
 };
 
-pub const Context = struct {
+const MAX_WINDOWS = 8;
+
+const Context = struct {
     allocator: std.mem.Allocator,
-    backend: Backend,
+    //TODO: windows: [MAX_WINDOWS]usize,
 };
 
-pub fn createContext(allocator: std.mem.Allocator) Error!*Context {
-    const backend = try Backend.initialize(allocator);
-    const ctx = try allocator.create(Context);
-    ctx.* = Context{
+var initialized: bool = false;
+var context: Context = undefined;
+
+pub fn initialize(allocator: std.mem.Allocator) Error!void {
+    try backend.initialize();
+
+    context = Context{
         .allocator = allocator,
-        .backend = backend,
     };
-    return ctx;
+    initialized = true;
 }
 
-pub fn destroyContext(ctx: *Context) void {
-    ctx.backend.shutdown(ctx.allocator);
-    ctx.allocator.destroy(ctx);
+pub fn deinit() void {
+    backend.shutdown();
+    initialized = false;
+    context = undefined;
 }
 
 // pub const WindowHandle = *opaque {};

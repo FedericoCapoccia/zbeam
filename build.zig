@@ -30,29 +30,29 @@ pub fn build(b: *std.Build) !void {
     check.dependOn(&lib_check.step);
 
     // Add TranslateC of Win32API
-    if (target.result.os.tag == .windows) {
-        const zigwin32 = b.dependency("zigwin32", .{});
-        lib.root_module.addImport("win32", zigwin32.module("win32"));
+    // if (target.result.os.tag == .windows) {
+    const zigwin32 = b.dependency("zigwin32", .{});
+    lib.root_module.addImport("win32", zigwin32.module("win32"));
 
-        if (lib.linkage.? == .dynamic) {
-            // lib.linkSystemLibrary("dwmapi");
-        }
-        // const win32_source =
-        //     \\#define WIN32_LEAN_AND_MEAN
-        //     \\#include <Windows.h>
-        //     \\#include <dwmapi.h>
-        // ;
-        //
-        // const tc = b.addTranslateC(.{
-        //     .root_source_file = b.addWriteFiles().add("win32.h", win32_source),
-        //     .target = target,
-        //     .optimize = optimize,
-        //     .link_libc = true,
-        // });
-        // const win32_mod = tc.addModule("win32");
-        // win32_mod.linkSystemLibrary("dwmapi", .{});
-        // lib.root_module.addImport("win32", win32_mod);
+    if (lib.linkage.? == .dynamic) {
+        // lib.linkSystemLibrary("dwmapi");
     }
+    // const win32_source =
+    //     \\#define WIN32_LEAN_AND_MEAN
+    //     \\#include <Windows.h>
+    //     \\#include <dwmapi.h>
+    // ;
+    //
+    // const tc = b.addTranslateC(.{
+    //     .root_source_file = b.addWriteFiles().add("win32.h", win32_source),
+    //     .target = target,
+    //     .optimize = optimize,
+    //     .link_libc = true,
+    // });
+    // const win32_mod = tc.addModule("win32");
+    // win32_mod.linkSystemLibrary("dwmapi", .{});
+    // lib.root_module.addImport("win32", win32_mod);
+    // }
 
     // Add TranslateC for Wayland
     if (target.result.os.tag == .linux) {
