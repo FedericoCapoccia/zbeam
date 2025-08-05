@@ -25,7 +25,7 @@ pub fn createContext(allocator: std.mem.Allocator) Error!*Context {
 }
 
 pub fn destroyContext(ctx: *Context) void {
-    ctx.backend.shutdown();
+    ctx.backend.shutdown(ctx.allocator);
     ctx.allocator.destroy(ctx);
 }
 

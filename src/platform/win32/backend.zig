@@ -16,7 +16,6 @@ const win32 = struct {
 extern const __ImageBase: win32.IMAGE_DOS_HEADER; // https://devblogs.microsoft.com/oldnewthing/20041025-00/?p=37483
 
 pub const Win32State = struct {
-    allocator: std.mem.Allocator,
     hinstance: win32.HINSTANCE,
     window_class: u16,
 };
@@ -28,7 +27,6 @@ pub fn initialize(allocator: std.mem.Allocator) Error!*Win32State {
 
     const state = try allocator.create(Win32State);
     state.* = Win32State{
-        .allocator = allocator,
         .hinstance = hinstance,
         .window_class = 0,
     };
@@ -36,6 +34,6 @@ pub fn initialize(allocator: std.mem.Allocator) Error!*Win32State {
     return state;
 }
 
-pub fn shutdown(state: *Win32State) void {
-    state.allocator.destroy(state);
+pub fn shutdown(state: *Win32State, allocator: std.mem.Allocator) void {
+    allocator.destroy(state);
 }

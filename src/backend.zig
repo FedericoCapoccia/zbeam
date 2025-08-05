@@ -15,9 +15,9 @@ pub const Backend = union(enum) {
         }
     }
 
-    pub fn shutdown(self: *Backend) void {
+    pub fn shutdown(self: *Backend, allocator: std.mem.Allocator) void {
         switch (self.*) {
-            .Windows => |state| backend_win32.shutdown(state),
+            .Windows => |state| backend_win32.shutdown(state, allocator),
             .Wayland => {},
         }
     }
